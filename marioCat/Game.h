@@ -6,6 +6,8 @@
 #include <iostream>
 #include "TextureManager.h"
 #include <vector>
+#include "Collision.h"
+
 class Game
 {
 public:
@@ -26,6 +28,6 @@ public:
 private:
 	SDL_Window* window;
 	SDL_Texture* character;
-	std::vector<SDL_Texture*> grass;
+	SDL_Texture* background;
 };
 

@@ -4,6 +4,9 @@ SDL_Renderer* Game::renderer = nullptr;
 SDL_Event Game::event;
 bool Game::isRunning = false;
 
+SDL_Rect destCat = { 0,0,100,100 };
+SDL_Rect destBG = { 0,0,1664,640 };
+
 void Game::init(const char* title, int xpos, int ypos, int width, int hight, bool fullScreen)
 {
 	int flags = 0;
@@ -32,6 +35,7 @@ void Game::init(const char* title, int xpos, int ypos, int width, int hight, boo
 		}
 	}
 
+	background= TextureManager::LoadTexture("assets/mapmario.png", Game::renderer);
 	character = TextureManager::LoadTexture("assets/marioCAT.png", Game::renderer);
 }
 
@@ -50,14 +54,20 @@ void Game::hundleEvents()
 
 void Game::update()
 {
-
+	++destCat.y;
+	if (Collision::AABB(destCat, { 0,448,800,64 }))
+	{
+		destCat.y = 348;
+		++destCat.x;
+	}
 }
 
 void Game::render()
 {
 	SDL_RenderClear(renderer);
 
-	TextureManager::Draw(character, { 0,0,100,100 }, SDL_FLIP_HORIZONTAL);
+	TextureManager::Draw(background, destBG, SDL_FLIP_HORIZONTAL);
+	TextureManager::Draw(character, destCat, SDL_FLIP_HORIZONTAL);
 
 	SDL_RenderPresent(renderer);
 }
