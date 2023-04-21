@@ -7,6 +7,11 @@
 #include "TextureManager.h"
 #include <vector>
 #include "Collision.h"
+#include "Player.h"
+#include "TransformComponent.h"
+#include "Map.h"
+#include "Collider.h"
+#include "ColliderMap.h"
 
 class Game
 {
@@ -18,6 +23,7 @@ public:
 	void update();
 	void render();
 	void clear();
+	void KeyBoardController();
 
 	bool running() { return isRunning; }
 
@@ -25,9 +31,10 @@ public:
 	static SDL_Event event;
 	static bool isRunning;
 
+	static std::vector<class Collider*> colliders;
+	
 private:
 	SDL_Window* window;
-	SDL_Texture* character;
 	SDL_Texture* background;
 };
 

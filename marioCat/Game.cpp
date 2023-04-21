@@ -1,11 +1,19 @@
 #include "Game.h"
+#include "Collider.h"
+#include "ColliderMap.h"
 
 SDL_Renderer* Game::renderer = nullptr;
 SDL_Event Game::event;
 bool Game::isRunning = false;
+std::vector<Collider*> Game::colliders;
 
-SDL_Rect destCat = { 0,0,100,100 };
-SDL_Rect destBG = { 0,0,1664,640 };
+Player* cat = nullptr;
+Map* map = nullptr;
+ColliderMap* colliderMap = nullptr;
+Vector2D possitionCat, possitionMap,possitionColl;
+
+SDL_Rect destBG = { 0,0,800,640 };
+SDL_Rect srcBG = { 0,0,1664,640 };
 
 void Game::init(const char* title, int xpos, int ypos, int width, int hight, bool fullScreen)
 {
@@ -34,9 +42,15 @@ void Game::init(const char* title, int xpos, int ypos, int width, int hight, boo
 			isRunning = false;
 		}
 	}
+	cat = new Player();
+	map = new Map();
+	colliderMap = new ColliderMap();
+	
+	//colliders.push_back(coll1);
+	colliderMap->LoadColliderMap("assets/colliderMap.txt",27,11,64);
 
-	background= TextureManager::LoadTexture("assets/mapmario.png", Game::renderer);
-	character = TextureManager::LoadTexture("assets/marioCAT.png", Game::renderer);
+	cat->init("assets/marioCAT.png",100,346,100,100);
+	map->init("assets/mapmario.png", 0, 0, 1664, 640);
 }
 
 void Game::hundleEvents()
@@ -54,20 +68,42 @@ void Game::hundleEvents()
 
 void Game::update()
 {
-	++destCat.y;
-	if (Collision::AABB(destCat, { 0,448,800,64 }))
+	possitionCat = cat->transform->possition;
+	possitionMap = map->transform->possition;
+	cat->transform->possition.y += 5;
+
+	KeyBoardController();
+
+	cat->transform->update();
+	map->transform->update();
+	for (Collider* colider : colliders)
 	{
-		destCat.y = 348;
-		++destCat.x;
+		colider->transform->update();
 	}
+
+	for (Collider* colider : colliders)
+	{
+		possitionColl = colider->transform->possition;
+		if (Collision::AABB(cat->getRect(), colider->getRect()))
+		{
+			cat->transform->possition = possitionCat;
+			if (Collision::AABB(cat->getRect(), colider->getRect()))
+			{
+				std::cout << "hit" << std::endl;
+				map->transform->possition = possitionMap;
+			}
+		}
+	}
+	possitionCat.y += 2;
 }
 
 void Game::render()
 {
 	SDL_RenderClear(renderer);
 
-	TextureManager::Draw(background, destBG, SDL_FLIP_HORIZONTAL);
-	TextureManager::Draw(character, destCat, SDL_FLIP_HORIZONTAL);
+	map->render();
+	cat->render();
+	colliderMap->DrawColliderMap();
 
 	SDL_RenderPresent(renderer);
 }
@@ -78,4 +114,58 @@ void Game::clear()
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
 	std::cout << "Game cleanned..." << std::endl;
+}
+
+void Game::KeyBoardController()
+{
+	if (Game::event.type == SDL_KEYDOWN)
+	{
+		switch (Game::event.key.keysym.sym)
+		{
+		case SDLK_w:
+			cat->transform->velocity.y = -1;
+			//cat->transform->update();
+			cat->transform->jumpCnt++;
+			//std::cout << cat->transform->jumpCnt++ << std::endl;
+			break;
+		case SDLK_a:
+			map->transform->velocity.x = +1;
+			for (Collider* colider : colliders)
+				colider->transform->velocity.x = +1;
+			//map->transform->update();
+			break;
+		case SDLK_d:
+			map->transform->velocity.x = -1;
+			for (Collider* colider : colliders)
+				colider->transform->velocity.x = -1;
+			//map->transform->update();
+			break;
+		default:
+			break;
+		}
+	}
+	if (Game::event.type == SDL_KEYUP)
+	{
+		switch (Game::event.key.keysym.sym)
+		{
+		case SDLK_w:
+			cat->transform->velocity.y =0;
+			//cat->transform->update();
+			break;
+		case SDLK_a:
+			map->transform->velocity.x = 0;
+			for (Collider* colider : colliders)
+				colider->transform->velocity.x = 0;
+			//map->transform->update();
+			break;
+		case SDLK_d:
+			map->transform->velocity.x = 0;
+			for (Collider* colider : colliders)
+				colider->transform->velocity.x = 0;
+			//map->transform->update();
+			break;
+		default:
+			break;
+		}
+	}
 }
