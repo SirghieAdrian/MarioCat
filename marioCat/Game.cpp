@@ -1,6 +1,5 @@
 #include "Game.h"
-#include "Collider.h"
-#include "ColliderMap.h"
+#include "TransformComponent.h"
 
 SDL_Renderer* Game::renderer = nullptr;
 SDL_Event Game::event;
@@ -10,7 +9,8 @@ std::vector<Collider*> Game::colliders;
 Player* cat = nullptr;
 Map* map = nullptr;
 ColliderMap* colliderMap = nullptr;
-Vector2D possitionCat, possitionMap,possitionColl;
+Vector2D possitionCat, possitionMap;
+std::vector<Vector2D> possitionColl;
 
 SDL_Rect destBG = { 0,0,800,640 };
 SDL_Rect srcBG = { 0,0,1664,640 };
@@ -68,8 +68,13 @@ void Game::hundleEvents()
 
 void Game::update()
 {
+	if(!possitionColl.empty())
+		possitionColl.clear();
+
 	possitionCat = cat->transform->possition;
 	possitionMap = map->transform->possition;
+	for (Collider* colider : colliders)
+		possitionColl.push_back(colider->transform->possition);
 	cat->transform->possition.y += 5;
 
 	KeyBoardController();
@@ -83,7 +88,6 @@ void Game::update()
 
 	for (Collider* colider : colliders)
 	{
-		possitionColl = colider->transform->possition;
 		if (Collision::AABB(cat->getRect(), colider->getRect()))
 		{
 			cat->transform->possition = possitionCat;
@@ -91,6 +95,12 @@ void Game::update()
 			{
 				std::cout << "hit" << std::endl;
 				map->transform->possition = possitionMap;
+				int i = 0;
+				for (Collider* colider : colliders)
+				{
+					colider->transform->possition = possitionColl[i];
+					i++;
+				}
 			}
 		}
 	}
