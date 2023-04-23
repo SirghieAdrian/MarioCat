@@ -13,8 +13,7 @@ public:
 	int speed;
 	int width;
 	int height;
-	bool jump;
-	int jumpCnt;
+	int jumpHeight;
 
 	TransformComponent(int x, int y, int w, int h, int sp)
 	{

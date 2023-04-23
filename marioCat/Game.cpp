@@ -6,6 +6,8 @@ SDL_Event Game::event;
 bool Game::isRunning = false;
 std::vector<Collider*> Game::colliders;
 
+int jumpCnt = 1;
+
 Player* cat = nullptr;
 Map* map = nullptr;
 ColliderMap* colliderMap = nullptr;
@@ -49,7 +51,7 @@ void Game::init(const char* title, int xpos, int ypos, int width, int hight, boo
 	//colliders.push_back(coll1);
 	colliderMap->LoadColliderMap("assets/colliderMap.txt",27,11,64);
 
-	cat->init("assets/marioCAT.png",100,346,100,100);
+	cat->init("assets/marioCAT.png",300,346,100,100);
 	map->init("assets/mapmario.png", 0, 0, 1664, 640);
 }
 
@@ -79,7 +81,8 @@ void Game::update()
 
 	KeyBoardController();
 
-	cat->transform->update();
+	if(jumpCnt==1)
+		cat->transform->update();
 	map->transform->update();
 	for (Collider* colider : colliders)
 	{
@@ -91,20 +94,23 @@ void Game::update()
 		if (Collision::AABB(cat->getRect(), colider->getRect()))
 		{
 			cat->transform->possition = possitionCat;
+			jumpCnt = 0;
 			if (Collision::AABB(cat->getRect(), colider->getRect()))
 			{
-				std::cout << "hit" << std::endl;
+				//std::cout << "hit" << std::endl;
 				map->transform->possition = possitionMap;
+				jumpCnt = 1;
 				int i = 0;
 				for (Collider* colider : colliders)
 				{
 					colider->transform->possition = possitionColl[i];
 					i++;
+					cat->transform->possition.y= possitionCat.y+2;
 				}
 			}
 		}
 	}
-	possitionCat.y += 2;
+	std::cout << map->transform->possition.x << std::endl;
 }
 
 void Game::render()
@@ -113,6 +119,7 @@ void Game::render()
 
 	map->render();
 	cat->render();
+	//std::cout << jumpCnt << std::endl;
 	colliderMap->DrawColliderMap();
 
 	SDL_RenderPresent(renderer);
@@ -134,18 +141,20 @@ void Game::KeyBoardController()
 		{
 		case SDLK_w:
 			cat->transform->velocity.y = -1;
-			//cat->transform->update();
-			cat->transform->jumpCnt++;
-			//std::cout << cat->transform->jumpCnt++ << std::endl;
+			jumpCnt++;
 			break;
 		case SDLK_a:
 			map->transform->velocity.x = +1;
+			if(jumpCnt==1)
+				jumpCnt++;
 			for (Collider* colider : colliders)
 				colider->transform->velocity.x = +1;
 			//map->transform->update();
 			break;
 		case SDLK_d:
 			map->transform->velocity.x = -1;
+			if (jumpCnt == 1)
+				jumpCnt++;
 			for (Collider* colider : colliders)
 				colider->transform->velocity.x = -1;
 			//map->transform->update();
