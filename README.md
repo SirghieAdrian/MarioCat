@@ -1,3 +1,3 @@
 # marioCat - game in progress
 
-![App Screenshot](marioCat/marioCat/assets/Screenshot.png)
+![App Screenshot](marioCat/assets/Screenshot.png)
