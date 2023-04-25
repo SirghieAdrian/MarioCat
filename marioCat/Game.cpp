@@ -114,7 +114,16 @@ void Game::update()
 
 	if (Collision::AABB(enemy->getRect(), cat->getRect()))
 	{
-		pause = true;
+		cat->transform->possition.y -= 5;
+		if (Collision::AABB(enemy->getRect(), cat->getRect()))
+		{
+			std::cout << "hit" << std::endl;
+			pause = true;
+		}
+		else
+		{
+			enemy->deleteEnemy();
+		}
 	}
 
 	//

@@ -35,3 +35,9 @@ void Enemy::render()
 	TextureManager::Draw(tex, { transform->possition.x,transform->possition.y,
 				transform->width,transform->height }, SDL_FLIP_NONE);
 }
+
+void Enemy::deleteEnemy()
+{
+	tex = nullptr;
+	transform->possition.x = transform->possition.y = -64;
+}

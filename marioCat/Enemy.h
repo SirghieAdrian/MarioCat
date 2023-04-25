@@ -11,5 +11,6 @@ public:
 	SDL_Rect getRect() { return { transform->possition.x,transform->possition.y,transform->width,transform->height }; }
 	void move(int &range);
 	void render();
+	void deleteEnemy();
 };
 
