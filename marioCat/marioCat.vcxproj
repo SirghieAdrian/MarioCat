@@ -138,6 +138,7 @@
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="ColliderMap.cpp" />
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Collider.h" />
     <ClInclude Include="ColliderMap.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Player.h" />

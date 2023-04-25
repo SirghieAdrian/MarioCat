@@ -8,5 +8,5 @@ void Map::init(const char* texture, int x, int y, int w, int h)
 
 void Map::render()
 {
-	TextureManager::Draw(tex, { transform->possition.x,0,transform->width,transform->height }, SDL_FLIP_HORIZONTAL);
+	TextureManager::Draw(tex, { transform->possition.x,0,transform->width,transform->height }, SDL_FLIP_NONE);
 }

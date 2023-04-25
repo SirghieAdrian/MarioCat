@@ -12,6 +12,7 @@
 #include "Map.h"
 #include "Collider.h"
 #include "ColliderMap.h"
+#include "Enemy.h"
 
 class Game
 {

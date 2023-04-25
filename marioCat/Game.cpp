@@ -7,11 +7,14 @@ bool Game::isRunning = false;
 std::vector<Collider*> Game::colliders;
 
 int jumpCnt = 1;
+int enemyRange = 0;
 
 Player* cat = nullptr;
 Map* map = nullptr;
 ColliderMap* colliderMap = nullptr;
-Vector2D possitionCat, possitionMap;
+Enemy* enemy = nullptr;
+
+Vector2D possitionCat, possitionMap,possitionEnemy;
 std::vector<Vector2D> possitionColl;
 
 SDL_Rect destBG = { 0,0,800,640 };
@@ -47,12 +50,16 @@ void Game::init(const char* title, int xpos, int ypos, int width, int hight, boo
 	cat = new Player();
 	map = new Map();
 	colliderMap = new ColliderMap();
+	enemy = new Enemy();
 	
 	//colliders.push_back(coll1);
-	colliderMap->LoadColliderMap("assets/colliderMap.txt",27,11,64);
+	colliderMap->LoadColliderMap("assets/colliderMap.txt",29,10,64);
 
 	cat->init("assets/marioCAT.png",300,346,100,100);
-	map->init("assets/mapmario.png", 0, 0, 1664, 640);
+	map->init("assets/mapMario.png", -320, 0, 2496, 640);
+	enemy->init("assets/enemy.png", 700, 448, 64, 64);
+
+	enemy->transform->possition.x = colliders[62]->transform->possition.x;
 }
 
 void Game::hundleEvents()
@@ -67,20 +74,37 @@ void Game::hundleEvents()
 		break;
 	}
 }
-
+/// <summary>
+/// mai adauga 4x64 stanga si dreapta la mapa
+/// 62 - 68
+/// </summary>
 void Game::update()
 {
+	std::cout << enemy->transform->velocity.x << std::endl;
+	//std::cout << colliders[64]->transform->possition.x << std::endl;
+
 	if(!possitionColl.empty())
 		possitionColl.clear();
 
 	possitionCat = cat->transform->possition;
+
 	possitionMap = map->transform->possition;
 	for (Collider* colider : colliders)
 		possitionColl.push_back(colider->transform->possition);
+	//possitionEnemy = enemy->transform->possition;
+
 	cat->transform->possition.y += 5;
 
 	KeyBoardController();
 
+	enemyRange++;
+	//enemy->move(enemyRange); ///urmareste 2 collidere dupa index
+	//enemy->transform->possition.x = colliders[62]->transform->possition.x;
+	///////////////
+	
+
+
+	///////////
 	if(jumpCnt==1)
 		cat->transform->update();
 	map->transform->update();
@@ -88,18 +112,19 @@ void Game::update()
 	{
 		colider->transform->update();
 	}
+	//enemy->transform->update();
 
 	for (Collider* colider : colliders)
 	{
-		if (Collision::AABB(cat->getRect(), colider->getRect()))
+		if (Collision::AABB(cat->getRect(), colider->getRect()))//collision up/down
 		{
 			cat->transform->possition = possitionCat;
-			jumpCnt = 0;
-			if (Collision::AABB(cat->getRect(), colider->getRect()))
+			jumpCnt = 1;
+			if (Collision::AABB(cat->getRect(), colider->getRect()))//collision left/right
 			{
-				//std::cout << "hit" << std::endl;
 				map->transform->possition = possitionMap;
-				jumpCnt = 1;
+				//enemy->transform->possition = possitionEnemy;
+				jumpCnt = 0;
 				int i = 0;
 				for (Collider* colider : colliders)
 				{
@@ -110,7 +135,15 @@ void Game::update()
 			}
 		}
 	}
-	std::cout << map->transform->possition.x << std::endl;
+
+	if (enemy->transform->possition.x <= colliders[62]->transform->possition.x)
+		enemy->transform->velocity.x = +1;
+	if (enemy->transform->possition.x >= colliders[68]->transform->possition.x)
+		enemy->transform->velocity.x = -1;
+	enemy->transform->update();
+
+	//std::cout << map->transform->possition.x << std::endl;
+
 }
 
 void Game::render()
@@ -119,8 +152,8 @@ void Game::render()
 
 	map->render();
 	cat->render();
-	//std::cout << jumpCnt << std::endl;
 	colliderMap->DrawColliderMap();
+	enemy->render();
 
 	SDL_RenderPresent(renderer);
 }
@@ -144,11 +177,12 @@ void Game::KeyBoardController()
 			jumpCnt++;
 			break;
 		case SDLK_a:
-			map->transform->velocity.x = +1;
-			if(jumpCnt==1)
-				jumpCnt++;
-			for (Collider* colider : colliders)
-				colider->transform->velocity.x = +1;
+				map->transform->velocity.x = +1;
+				if (jumpCnt == 1)
+					jumpCnt++;
+				for (Collider* colider : colliders)
+					colider->transform->velocity.x = +1;
+				//enemy->transform->velocity.x = +1;
 			//map->transform->update();
 			break;
 		case SDLK_d:
@@ -157,6 +191,7 @@ void Game::KeyBoardController()
 				jumpCnt++;
 			for (Collider* colider : colliders)
 				colider->transform->velocity.x = -1;
+			//enemy->transform->velocity.x = -1;
 			//map->transform->update();
 			break;
 		default:
@@ -175,12 +210,14 @@ void Game::KeyBoardController()
 			map->transform->velocity.x = 0;
 			for (Collider* colider : colliders)
 				colider->transform->velocity.x = 0;
+			//enemy->transform->velocity.x = 0;
 			//map->transform->update();
 			break;
 		case SDLK_d:
 			map->transform->velocity.x = 0;
 			for (Collider* colider : colliders)
 				colider->transform->velocity.x = 0;
+			//enemy->transform->velocity.x = 0;
 			//map->transform->update();
 			break;
 		default:

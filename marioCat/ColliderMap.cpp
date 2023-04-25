@@ -17,7 +17,7 @@ void ColliderMap::LoadColliderMap(const char* path, int sizeX, int sizeY,int hei
 			if (atoi(&c) == 0)
 			{
 				Collider* collider = new Collider();
-				collider->init("assets/collider.png", x * height,y*height,height,height);
+				collider->init("assets/collider.png", x * height,y*height,height,height);//
 				Game::colliders.push_back(collider);
 			}
 			mapFile.ignore();
