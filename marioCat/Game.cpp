@@ -4,6 +4,7 @@
 SDL_Renderer* Game::renderer = nullptr;
 SDL_Event Game::event;
 bool Game::isRunning = false;
+bool Game::pause = false;
 std::vector<Collider*> Game::colliders;
 
 int jumpCnt = 1;
@@ -13,6 +14,7 @@ Player* cat = nullptr;
 Map* map = nullptr;
 ColliderMap* colliderMap = nullptr;
 Enemy* enemy = nullptr;
+SDL_Texture* text;
 
 Vector2D possitionCat, possitionMap,possitionEnemy;
 std::vector<Vector2D> possitionColl;
@@ -58,6 +60,7 @@ void Game::init(const char* title, int xpos, int ypos, int width, int hight, boo
 	cat->init("assets/marioCAT.png",300,346,100,100);
 	map->init("assets/mapMario.png", -320, 0, 2496, 640);
 	enemy->init("assets/enemy.png", 700, 448, 64, 64);
+	text = TextureManager::LoadTexture("assets/text.png");
 
 	enemy->transform->possition.x = colliders[62]->transform->possition.x;
 }
@@ -80,8 +83,6 @@ void Game::hundleEvents()
 /// </summary>
 void Game::update()
 {
-	std::cout << enemy->transform->velocity.x << std::endl;
-	//std::cout << colliders[64]->transform->possition.x << std::endl;
 
 	if(!possitionColl.empty())
 		possitionColl.clear();
@@ -91,20 +92,35 @@ void Game::update()
 	possitionMap = map->transform->possition;
 	for (Collider* colider : colliders)
 		possitionColl.push_back(colider->transform->possition);
-	//possitionEnemy = enemy->transform->possition;
-
+	
 	cat->transform->possition.y += 5;
+
+	//enemy 
+	if (Collision::AABB(enemy->getRect(), { colliders[61]->getRect().x,colliders[61]->getRect().y - 64,
+		colliders[61]->getRect().w,colliders[61]->getRect().h }))
+	{
+		std::cout << "hit left" << std::endl;
+		enemy->transform->possition.x = colliders[62]->transform->possition.x+4;
+		enemy->transform->velocity.x = +1;
+	}
+	if (Collision::AABB(enemy->getRect(), { colliders[68]->getRect().x,colliders[68]->getRect().y - 64,
+		colliders[68]->getRect().w,colliders[68]->getRect().h }))
+	{
+		std::cout << "hit right" << std::endl;
+		enemy->transform->possition.x = colliders[67]->transform->possition.x-4;
+		enemy->transform->velocity.x = -1;
+	}
+	enemy->transform->update();
+
+	if (Collision::AABB(enemy->getRect(), cat->getRect()))
+	{
+		pause = true;
+	}
+
+	//
 
 	KeyBoardController();
 
-	enemyRange++;
-	//enemy->move(enemyRange); ///urmareste 2 collidere dupa index
-	//enemy->transform->possition.x = colliders[62]->transform->possition.x;
-	///////////////
-	
-
-
-	///////////
 	if(jumpCnt==1)
 		cat->transform->update();
 	map->transform->update();
@@ -112,7 +128,6 @@ void Game::update()
 	{
 		colider->transform->update();
 	}
-	//enemy->transform->update();
 
 	for (Collider* colider : colliders)
 	{
@@ -123,7 +138,6 @@ void Game::update()
 			if (Collision::AABB(cat->getRect(), colider->getRect()))//collision left/right
 			{
 				map->transform->possition = possitionMap;
-				//enemy->transform->possition = possitionEnemy;
 				jumpCnt = 0;
 				int i = 0;
 				for (Collider* colider : colliders)
@@ -136,13 +150,6 @@ void Game::update()
 		}
 	}
 
-	if (enemy->transform->possition.x <= colliders[62]->transform->possition.x)
-		enemy->transform->velocity.x = +1;
-	if (enemy->transform->possition.x >= colliders[68]->transform->possition.x)
-		enemy->transform->velocity.x = -1;
-	enemy->transform->update();
-
-	//std::cout << map->transform->possition.x << std::endl;
 
 }
 
@@ -154,6 +161,8 @@ void Game::render()
 	cat->render();
 	colliderMap->DrawColliderMap();
 	enemy->render();
+	if(pause==true)
+		TextureManager::Draw(text, { 200,220,400,200 }, SDL_FLIP_NONE);
 
 	SDL_RenderPresent(renderer);
 }
@@ -182,8 +191,6 @@ void Game::KeyBoardController()
 					jumpCnt++;
 				for (Collider* colider : colliders)
 					colider->transform->velocity.x = +1;
-				//enemy->transform->velocity.x = +1;
-			//map->transform->update();
 			break;
 		case SDLK_d:
 			map->transform->velocity.x = -1;
@@ -191,8 +198,6 @@ void Game::KeyBoardController()
 				jumpCnt++;
 			for (Collider* colider : colliders)
 				colider->transform->velocity.x = -1;
-			//enemy->transform->velocity.x = -1;
-			//map->transform->update();
 			break;
 		default:
 			break;
@@ -204,21 +209,16 @@ void Game::KeyBoardController()
 		{
 		case SDLK_w:
 			cat->transform->velocity.y =0;
-			//cat->transform->update();
 			break;
 		case SDLK_a:
 			map->transform->velocity.x = 0;
 			for (Collider* colider : colliders)
 				colider->transform->velocity.x = 0;
-			//enemy->transform->velocity.x = 0;
-			//map->transform->update();
 			break;
 		case SDLK_d:
 			map->transform->velocity.x = 0;
 			for (Collider* colider : colliders)
 				colider->transform->velocity.x = 0;
-			//enemy->transform->velocity.x = 0;
-			//map->transform->update();
 			break;
 		default:
 			break;

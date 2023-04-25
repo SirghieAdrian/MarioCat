@@ -3,7 +3,7 @@
 void Enemy::init(const char* texture, int x, int y, int w, int h)
 {
 	tex = TextureManager::LoadTexture(texture);
-	transform = new TransformComponent(x, y, w, h, 7);
+	transform = new TransformComponent(x, y, w, h, 4);
 }
 
 void Enemy::move(int &range)

@@ -27,10 +27,12 @@ public:
 	void KeyBoardController();
 
 	bool running() { return isRunning; }
+	bool getPause() { return pause; }
 
 	static SDL_Renderer* renderer;
 	static SDL_Event event;
 	static bool isRunning;
+	static bool pause;
 
 	static std::vector<class Collider*> colliders;
 	
